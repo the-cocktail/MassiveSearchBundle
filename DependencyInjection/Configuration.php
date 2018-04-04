@@ -33,7 +33,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
                 ->enumNode('adapter')
-                    ->values(['zend_lucene', 'elastic', 'test'])
+                    ->values(['zend_lucene', 'elastic', 'algolia', 'test'])
                     ->defaultValue('zend_lucene')->end()
                 ->arrayNode('adapters')
                     ->addDefaultsifNotSet()
