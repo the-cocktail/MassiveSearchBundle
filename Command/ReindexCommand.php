@@ -32,6 +32,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
  */
 class ReindexCommand extends Command
 {
+    protected static $defaultName = 'massive:search:reindex';
+
     /**
      * @var string
      */
@@ -64,7 +66,8 @@ class ReindexCommand extends Command
         $env,
         QuestionHelper $questionHelper = null
     ) {
-        parent::__construct();
+        parent::__construct(self::$defaultName);
+
         $this->resumeManager = $resumeManager;
         $this->searchManager = $searchManager;
         $this->providerRegistry = $providerRegistry;
@@ -77,7 +80,6 @@ class ReindexCommand extends Command
      */
     public function configure()
     {
-        $this->setName('massive:search:reindex');
         $this->setDescription('Rebuild search index');
         $this->setHelp(<<<'EOT'
 This command will launch an event will trigger the search index to be rebuilt
@@ -98,7 +100,7 @@ EOT
 
         $startTime = microtime(true);
 
-        if ($this->env !== 'prod') {
+        if ('prod' !== $this->env) {
             $output->writeln(
                 $formatterHelper->formatBlock(
                     sprintf(
@@ -197,7 +199,7 @@ EOT
         while (true) {
             $objects = $provider->provide($classFqn, $offset, $batchSize);
 
-            if (count($objects) === 0) {
+            if (0 === count($objects)) {
                 $provider->cleanUp($classFqn);
                 $this->resumeManager->setCheckpoint($providerName, $classFqn, $count);
                 $progress->finish();

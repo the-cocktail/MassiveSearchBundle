@@ -28,14 +28,22 @@ use Massive\Bundle\SearchBundle\Search\SearchResult;
 class ElasticSearchAdapter implements AdapterInterface
 {
     const ID_FIELDNAME = '__id';
+
     const INDEX_FIELDNAME = '__index';
+
     const CLASS_TAG = '__class';
 
     const URL_FIELDNAME = '__url';
+
     const TITLE_FIELDNAME = '__title';
+
     const DESCRIPTION_FIELDNAME = '__description';
+
     const LOCALE_FIELDNAME = '__locale';
+
     const IMAGE_URL = '__image_url';
+
+    const DOCUMENT_TYPE = '__document_type';
 
     /**
      * @var \Massive\Bundle\SearchBundle\Search\Factory
@@ -103,6 +111,8 @@ class ElasticSearchAdapter implements AdapterInterface
             }
         }
 
+        $documentType = $this->documentToType($document);
+
         $fields[self::ID_FIELDNAME] = $document->getId();
         $fields[self::INDEX_FIELDNAME] = $document->getIndex();
         $fields[self::URL_FIELDNAME] = $document->getUrl();
@@ -111,16 +121,23 @@ class ElasticSearchAdapter implements AdapterInterface
         $fields[self::LOCALE_FIELDNAME] = $document->getLocale();
         $fields[self::CLASS_TAG] = $document->getClass();
         $fields[self::IMAGE_URL] = $document->getImageUrl();
+        $fields[self::DOCUMENT_TYPE] = $documentType;
 
         // ensure that any new index name is listed when calling listIndexes
         $this->indexList[$indexName] = $indexName;
 
         $params = [
             'id' => $document->getId(),
+            'type' => $indexName,
             'index' => $indexName,
-            'type' => $this->documentToType($document),
             'body' => $fields,
         ];
+
+        // for BC we still set for older elasticsearch versions the type attribute to the documentType
+        // can be removed when min requirement of elasticsearch >= 6.0
+        if (version_compare($this->version, '6.0', '<')) {
+            $params['type'] = $documentType;
+        }
 
         $this->client->index($params);
     }
@@ -132,10 +149,16 @@ class ElasticSearchAdapter implements AdapterInterface
     {
         $params = [
             'index' => $indexName,
-            'type' => $this->documentToType($document),
+            'type' => $indexName,
             'id' => $document->getId(),
             'refresh' => true,
         ];
+
+        // for BC we still set for older elasticsearch versions the type attribute to the documentType
+        // can be removed when min requirement of elasticsearch >= 6.0
+        if (version_compare($this->version, '6.0', '<')) {
+            $params['type'] = $this->documentToType($document);
+        }
 
         try {
             $this->client->delete($params);
@@ -300,7 +323,7 @@ class ElasticSearchAdapter implements AdapterInterface
             return 'massive_undefined';
         }
 
-        return substr(str_replace('\\', '_', $class), 1);
+        return ltrim(str_replace('\\', '_', $class), '_');
     }
 
     /**

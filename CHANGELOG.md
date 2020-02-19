@@ -1,12 +1,24 @@
 CHANGELOG
 =========
 
-* dev-master
+* 0.17.3 (2019-08-22)
+    * ENHANCEMENT  #130 Add command default names
+
+* 0.17.2 (2019-08-20)
+    * ENHANCEMENT  #129 Added dispatching of pre-deindex event
+    * ENHANCEMENT  #127 Custom repository method bugfix
+
+* 0.17.1 (2019-02-05)
+    * HOTFIX       #126 Fix compatibility to php 7.2
+
+* 0.17.0 (2018-09-25)
+    * ENHANCEMENT  #124 Updated dependencies for symfony4 and fixed deprecations 
+    * ENHANCEMENT  #114 Updated elasticsearch dependency
     * ENHANCEMENT  #111 Increased php memory_limit and fixed elasticsearch-installation for travis
 
 * 0.16.2 (2017-06-16)
     * HOTFIX      #3406 (Sulu) Modified ElasticSearchAdapter search function, removed size paramter once limit is empty
-    
+
 * 0.16.1 (2017-05-11)
     * HOTFIX      #107 Added encode and decode field-name to elasticsearch adapter
 

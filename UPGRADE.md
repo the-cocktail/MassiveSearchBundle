@@ -1,5 +1,31 @@
 # UPGRADE
 
+## 2.0.0
+
+## JMS/Metadata package update to 2.0
+
+To update JMS/Metadata to 2.0 the following public functions were removed:
+
+ - Massive\Bundle\SearchBundle\Search\Metadata\Driver::loadMetadataFromFile
+ - Massive\Bundle\SearchBundle\Search\Metadata\Driver::getExtension
+
+Because of the update we had to increase the required `php` version to `7.2`.
+Also the requirement of symfony packages where increased to `^4.3`.
+
+## 1.0.0
+
+No breaking changes.
+
+## 0.17.0
+
+The _type field in Elasticsearch has been modified so it correctly reflects the fully qualified
+class name (FQCN) of the documents being indexed in snake case. When you are using Elasticsearch
+and upgrade, you will have to rebuild the indexes using the following command :
+
+```bash
+bin/console massive:search:reindex
+```
+
 ## 0.11.0
 
 ### IndexName decorators

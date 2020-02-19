@@ -11,6 +11,7 @@
 
 namespace Massive\Bundle\SearchBundle\Unit\DependencyInjection;
 
+use Doctrine\Orm\EntityManager;
 use Massive\Bundle\SearchBundle\DependencyInjection\MassiveSearchExtension;
 use Massive\Bundle\SearchBundle\MassiveSearchBundle;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
@@ -23,11 +24,13 @@ class MassiveSearchExtensionTest extends AbstractExtensionTestCase
     {
         parent::setUp();
 
-        $this->container->setParameter('kernel.root_dir', '/some/path');
+        $this->container->setParameter('kernel.project_dir', __DIR__ . '/../../Resources/app');
+        $this->container->setParameter('kernel.root_dir', __DIR__ . '/../../Resources/app');
         $this->container->setParameter('kernel.cache_dir', __DIR__ . '/../../Resources/app/cache');
         $this->container->setParameter('kernel.debug', false);
         $this->container->register('event_dispatcher', EventDispatcher::class);
         $this->container->register('filesystem', Filesystem::class);
+        $this->container->register('doctrine.orm.entity_manager', EntityManager::class);
     }
 
     protected function getContainerExtensions()
@@ -127,7 +130,7 @@ class MassiveSearchExtensionTest extends AbstractExtensionTestCase
             [
                 'doctrine_orm',
                 [
-                    'massive_search.search.event_subscriber.doctrine_orm',
+                    'massive_search_test.search.event_subscriber.doctrine_orm',
                 ],
             ],
         ];
@@ -148,7 +151,7 @@ class MassiveSearchExtensionTest extends AbstractExtensionTestCase
         $this->compile();
 
         foreach ($expectedServices as $serviceId) {
-            $this->container->get($serviceId);
+            $this->container->hasDefinition($serviceId);
         }
     }
 }

@@ -1,6 +1,7 @@
 language: php
 
 sudo: false
+dist: trusty
 
 env:
     global:
@@ -9,36 +10,39 @@ env:
 
 matrix:
   include:
-    - php: 5.5
+    - php: 7.2
       env:
         - PREFER="--prefer-lowest"
         - SYMFONY_DEPRECATIONS_HELPER=weak
-    - php: 5.5
+        - ENABLE_SWAP=true
+    - php: 7.4
       env:
         - PREFER=""
-        - SYMFONY_DEPRECATIONS_HELPER=weak
-    - php: 5.6
-      env:
-        - PREFER=""
-        - SYMFONY_DEPRECATIONS_HELPER=weak
-    - php: 7.0
-      env:
-        - PREFER=""
-        - SYMFONY_DEPRECATIONS_HELPER=weak
+        - SYMFONY_DEPRECATIONS_HELPER=strong
 
 before_install:
   - curl -L -o elasticsearch.zip ${ES_DOWNLOAD_URL}
   - ls -lah
+  - | # enable swap
+    if [[ $ENABLE_SWAP == 'true' ]]; then
+        sudo fallocate -l 4G /swapfile
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile
+        sudo swapon /swapfile
+        sudo sysctl vm.swappiness=20
+    fi
   - unzip elasticsearch.zip
-  - elasticsearch-*/bin/elasticsearch -d
+  - phpenv config-rm xdebug.ini || true
   - phpenv config-add Tests/travis.php.ini
   - composer self-update
 
 before_script:
-    - composer selfupdate
-    - composer update $PREFER
+    - composer require elasticsearch/elasticsearch:^2.1 --dev --no-update
+    - composer update --prefer-dist $PREFER
+    - elasticsearch-*/bin/elasticsearch -d
+    - wget -q --waitretry=2 --retry-connrefused -T 20 -O - http://127.0.0.1:9200
 
-script: 
+script:
     - vendor/bin/phpunit --coverage-text
     - vendor/bin/behat --suite=zend_lucene
     - vendor/bin/behat --suite=elastic
